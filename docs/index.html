@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Money Buddy Bills Helper</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <h1>Money Buddy Bills Helper</h1>
+      <p class="subtitle">Simple steps for bills and money tasks</p>
+      <div id="app-message" class="app-message hidden" aria-live="polite">
+        <span id="app-message-text"></span>
+        <button id="app-message-close" class="message-close" type="button" aria-label="Close message">×</button>
+      </div>
+    </header>
+
+    <nav class="tabs" aria-label="Main navigation">
+      <button class="tab is-active" data-tab="today">Today</button>
+      <button class="tab" data-tab="monthly">Monthly Walkthrough</button>
+      <button class="tab" data-tab="other">Other Bills</button>
+      <button class="tab" data-tab="taxes">Taxes & Annual</button>
+      <button class="tab" data-tab="history">History</button>
+      <button class="tab" data-tab="settings">Settings</button>
+    </nav>
+
+    <main>
+      <section id="tab-today" class="panel active" aria-labelledby="today-heading">
+        <h2 id="today-heading">Today</h2>
+        <div class="card">
+          <h3>What should I do now?</h3>
+          <p id="next-action">Loading...</p>
+          <button id="resume-monthly" class="primary">Resume Monthly Walkthrough</button>
+        </div>
+
+        <div class="card">
+          <h3>Upcoming Alerts</h3>
+          <ul id="alerts-list" class="list"></ul>
+        </div>
+      </section>
+
+      <section id="tab-monthly" class="panel" aria-labelledby="monthly-heading">
+        <h2 id="monthly-heading">Monthly Bills Walkthrough</h2>
+
+        <div class="progress-wrap" aria-live="polite">
+          <span id="monthly-progress">Step 1 of 4</span>
+          <div class="progress-track"><div id="progress-bar" class="progress-bar"></div></div>
+        </div>
+
+        <article id="monthly-step-1" class="card monthly-step">
+          <h3>Step 1: Enter balances</h3>
+          <p>Type the current balances. The calculator will do the math.</p>
+          <div class="form-grid">
+            <label>VyStar checking
+              <input id="checking" inputmode="decimal" placeholder="Example: 5234.67" />
+            </label>
+            <label>VyStar savings
+              <input id="savings" inputmode="decimal" placeholder="Example: 71000" />
+            </label>
+            <label>Citi balance
+              <input id="citi" inputmode="decimal" placeholder="Example: 1200" />
+            </label>
+          </div>
+          <button id="calc-monthly" class="primary">Calculate</button>
+          <details>
+            <summary>Show math explanation</summary>
+            <p>We keep $4,000 in checking for automatic bills.</p>
+            <p><strong>Result = checking - citi - 4000</strong></p>
+          </details>
+        </article>
+
+        <article id="monthly-step-2" class="card monthly-step hidden">
+          <h3>Step 2: Move money</h3>
+          <p id="monthly-result-text"></p>
+          <ul id="monthly-move-list" class="list"></ul>
+          <button id="monthly-step-2-back" class="secondary">Back</button>
+          <button id="monthly-step-2-done" class="primary">Done with this step</button>
+        </article>
+
+        <article id="monthly-step-3" class="card monthly-step hidden">
+          <h3>Step 3: Pay Citi card</h3>
+          <p>Pay Citi now (best near the 1st, usually due by the 9th).</p>
+          <ol class="list">
+            <li>Open the Citi app or website and sign in.</li>
+            <li>Select your credit card account.</li>
+            <li>Select <strong>Make Payment</strong>.</li>
+            <li>For amount, select <strong>Current Balance</strong>.</li>
+            <li>Choose your VyStar checking account for payment.</li>
+            <li>Submit the payment and wait for confirmation.</li>
+            <li>After you see confirmation, enter the confirmation number below (optional).</li>
+          </ol>
+          <p class="muted">Tip: If menu names look a little different, pick the option that matches “pay full current balance.”</p>
+          <label>Optional confirmation number
+            <input id="citi-confirmation" type="text" placeholder="Example: 12345678" />
+          </label>
+          <button id="monthly-step-3-back" class="secondary">Back</button>
+          <button id="monthly-step-3-done" class="primary">Continue</button>
+        </article>
+
+        <article id="monthly-step-4" class="card monthly-step hidden">
+          <h3>Step 4: Move money to Vanguard (last step)</h3>
+          <p id="monthly-vanguard-text"></p>
+
+          <div id="monthly-vanguard-form-wrap">
+            <h4>Enter current Vanguard amounts</h4>
+            <p class="muted">Use current values from your Vanguard account. The site will do the math and tell you exactly what to buy.</p>
+            <div class="form-grid">
+              <label>Settlement fund current amount
+                <input id="mv-settlement" inputmode="decimal" placeholder="Example: 28750" />
+              </label>
+              <label>VTSAX current amount
+                <input id="mv-vtsax" inputmode="decimal" placeholder="Example: 44000" />
+              </label>
+              <label>VTIAX current amount
+                <input id="mv-vtiax" inputmode="decimal" placeholder="Example: 25000" />
+              </label>
+              <label>VBTLX current amount
+                <input id="mv-vbtlx" inputmode="decimal" placeholder="Example: 11000" />
+              </label>
+              <label>VTABX current amount
+                <input id="mv-vtabx" inputmode="decimal" placeholder="Example: 3500" />
+              </label>
+            </div>
+
+            <button id="monthly-calc-vanguard" class="primary">Calculate Exactly What to Buy</button>
+
+            <h4>What to buy now</h4>
+            <ul id="monthly-vanguard-summary" class="list"></ul>
+
+            <h4>How to place the buys</h4>
+            <ol id="monthly-vanguard-actions" class="list"></ol>
+          </div>
+
+          <ol id="monthly-vanguard-steps" class="list"></ol>
+          <button id="monthly-step-4-back" class="secondary">Back</button>
+          <button id="complete-monthly" class="primary">Mark Monthly Workflow Complete</button>
+          <div id="reward" class="reward hidden" aria-live="polite">
+            <img src="assets/rewards/celebrate.svg" alt="Celebration reward" />
+          </div>
+        </article>
+      </section>
+
+      <section id="tab-other" class="panel" aria-labelledby="other-heading">
+        <h2 id="other-heading">Other Bills Walkthroughs</h2>
+
+        <article class="card">
+          <h3>Boardman Lawn Care</h3>
+          <p><strong>Amount:</strong> $160</p>
+          <p><strong>Status:</strong> <span id="other-boardman-status" class="status-pill">Loading...</span></p>
+          <p id="other-boardman-dates" class="muted">Loading schedule...</p>
+          <ol class="list">
+            <li>Open the VyStar app or website and sign in.</li>
+            <li>Go to <strong>Pay & Transfer</strong>.</li>
+            <li>Select <strong>Zelle</strong>.</li>
+            <li>Select Boardman contact (or enter recipient).</li>
+            <li>Enter <strong>$160</strong> and send payment.</li>
+            <li>Wait for confirmation, then click <strong>Mark as Paid</strong> below.</li>
+          </ol>
+          <button class="primary mark-complete" data-bill-key="boardman" data-task="Boardman Lawn Care paid" data-alert-key="boardman">Mark as Paid</button>
+        </article>
+
+        <article class="card">
+          <h3>Happy Lawns / Integrity Lawn</h3>
+          <p><strong>Amount:</strong> about $94</p>
+          <p><strong>Status:</strong> <span id="other-happylawns-status" class="status-pill">Loading...</span></p>
+          <p id="other-happylawns-dates" class="muted">Loading schedule...</p>
+          <ol class="list">
+            <li>Check your email for the lawn service bill message.</li>
+            <li>Open the payment link in that email.</li>
+            <li>Enter your credit card details and confirm amount.</li>
+            <li>Submit payment and wait for confirmation screen/email.</li>
+            <li>Then click <strong>Mark as Paid</strong> below.</li>
+          </ol>
+          <button id="happy-lawns-received" class="secondary">I got the email bill</button>
+          <button class="primary mark-complete" data-bill-key="happylawns" data-task="Happy Lawns paid">Mark as Paid</button>
+        </article>
+
+        <article class="card">
+          <h3>Mercury Car Insurance</h3>
+          <p><strong>Amount:</strong> about $2,000</p>
+          <p><strong>Status:</strong> <span id="other-mercury-status" class="status-pill">Loading...</span></p>
+          <p id="other-mercury-dates" class="muted">Loading schedule...</p>
+          <ol class="list">
+            <li>Open the Mercury website and sign in.</li>
+            <li>Go to your policy billing/payment page.</li>
+            <li>Select <strong>Make Payment</strong>.</li>
+            <li>Verify amount due and payment method.</li>
+            <li>Submit payment and wait for confirmation.</li>
+            <li>Then click <strong>Mark as Paid</strong> below.</li>
+          </ol>
+          <button class="primary mark-complete" data-bill-key="mercury" data-task="Mercury Insurance paid" data-alert-key="mercury">Mark as Paid</button>
+        </article>
+      </section>
+
+      <section id="tab-taxes" class="panel" aria-labelledby="taxes-heading">
+        <h2 id="taxes-heading">Taxes & Annual Tasks</h2>
+        <article class="card">
+          <h3>Tax Filing (Due April 15)</h3>
+          <ul class="list">
+            <li><label class="checkline"><input type="checkbox" class="tax-item" value="W-2 gathered" /> Gather W-2</label></li>
+            <li><label class="checkline"><input type="checkbox" class="tax-item" value="VyStar 1099-INT gathered" /> Gather VyStar 1099-INT</label></li>
+            <li><label class="checkline"><input type="checkbox" class="tax-item" value="Vanguard 1099-DIV gathered" /> Gather Vanguard 1099-DIV</label></li>
+            <li><label class="checkline"><input type="checkbox" class="tax-item" value="Taxes filed in FreeTaxUSA" /> File in FreeTaxUSA</label></li>
+          </ul>
+          <button id="save-tax-progress" class="primary">Save Tax Progress</button>
+        </article>
+
+        <article class="card">
+          <h3>Roth IRA Check</h3>
+          <p>Check AGI is below Roth IRA limit and contribute max if eligible.</p>
+          <button class="primary mark-complete" data-task="Roth IRA check completed">Mark as Done</button>
+        </article>
+      </section>
+
+      <section id="tab-history" class="panel" aria-labelledby="history-heading">
+        <h2 id="history-heading">History</h2>
+        <div class="card">
+          <p>All saved actions are kept locally on this device.</p>
+          <button id="clear-history" class="danger">Clear History</button>
+          <ul id="history-list" class="list history"></ul>
+        </div>
+      </section>
+
+      <section id="tab-settings" class="panel" aria-labelledby="settings-heading">
+        <h2 id="settings-heading">Settings</h2>
+        <div class="card">
+          <h3>Theme</h3>
+          <label>Choose a theme
+            <select id="theme-select">
+              <option value="light">Light</option>
+              <option value="soft-dark">Soft Dark</option>
+            </select>
+          </label>
+          <p class="muted">Theme options are a placeholder for MVP.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">Built for simple step-by-step bill management.</footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>
