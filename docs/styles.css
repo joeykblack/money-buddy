@@ -38,6 +38,28 @@ body {
   padding: 1rem;
 }
 
+.site-header {
+  position: relative;
+}
+
+.header-theme {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.header-theme label {
+  display: block;
+  font-weight: 600;
+}
+
+.header-theme select {
+  min-width: 120px;
+}
+
 .subtitle {
   color: var(--muted);
   margin-top: 0.2rem;
@@ -306,4 +328,12 @@ button {
 
 .status-pill.alert-later {
   background: rgba(134, 142, 150, 0.15);
+}
+
+@media (max-width: 640px) {
+  .header-theme {
+    position: static;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+  }
 }

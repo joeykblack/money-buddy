@@ -3,12 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Money Buddy Bills Helper</title>
+    <title>Money Buddy</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <header class="site-header">
-      <h1>Money Buddy Bills Helper</h1>
+      <div class="header-theme">
+        <label for="theme-select">Theme</label>
+        <select id="theme-select">
+          <option value="light">Light</option>
+          <option value="soft-dark">Soft Dark</option>
+        </select>
+      </div>
+      <h1>Money Buddy</h1>
       <p class="subtitle">Simple steps for bills and money tasks</p>
       <div id="app-message" class="app-message hidden" aria-live="polite">
         <span id="app-message-text"></span>
@@ -22,7 +29,6 @@
       <button class="tab" data-tab="other">Other Bills</button>
       <button class="tab" data-tab="taxes">Taxes & Annual</button>
       <button class="tab" data-tab="history">History</button>
-      <button class="tab" data-tab="settings">Settings</button>
     </nav>
 
     <main>
@@ -82,7 +88,7 @@
           <h3>Step 3: Pay Citi card</h3>
           <p>Pay Citi now (best near the 1st, usually due by the 9th).</p>
           <ol class="list">
-            <li>Open the Citi app or website and sign in.</li>
+            <li>Open the Citi app or website (<a href="https://www.citi.com" target="_blank" rel="noopener noreferrer">citi.com</a>) and sign in.</li>
             <li>Select your credit card account.</li>
             <li>Select <strong>Make Payment</strong>.</li>
             <li>For amount, select <strong>Current Balance</strong>.</li>
@@ -150,7 +156,7 @@
           <p><strong>Status:</strong> <span id="other-boardman-status" class="status-pill">Loading...</span></p>
           <p id="other-boardman-dates" class="muted">Loading schedule...</p>
           <ol class="list">
-            <li>Open the VyStar app or website and sign in.</li>
+            <li>Open the VyStar app or website (<a href="https://www.vystarcu.org" target="_blank" rel="noopener noreferrer">vystarcu.org</a>) and sign in.</li>
             <li>Go to <strong>Pay & Transfer</strong>.</li>
             <li>Select <strong>Zelle</strong>.</li>
             <li>Select Boardman contact (or enter recipient).</li>
@@ -182,7 +188,7 @@
           <p><strong>Status:</strong> <span id="other-mercury-status" class="status-pill">Loading...</span></p>
           <p id="other-mercury-dates" class="muted">Loading schedule...</p>
           <ol class="list">
-            <li>Open the Mercury website and sign in.</li>
+            <li>Open Mercury website (<a href="https://www.mercuryinsurance.com" target="_blank" rel="noopener noreferrer">mercuryinsurance.com</a>) and sign in.</li>
             <li>Go to your policy billing/payment page.</li>
             <li>Select <strong>Make Payment</strong>.</li>
             <li>Verify amount due and payment method.</li>
@@ -197,6 +203,7 @@
         <h2 id="taxes-heading">Taxes & Annual Tasks</h2>
         <article class="card">
           <h3>Tax Filing (Due April 15)</h3>
+          <p class="muted">File taxes at <a href="https://www.freetaxusa.com" target="_blank" rel="noopener noreferrer">freetaxusa.com</a>.</p>
           <ul class="list">
             <li><label class="checkline"><input type="checkbox" class="tax-item" value="W-2 gathered" /> Gather W-2</label></li>
             <li><label class="checkline"><input type="checkbox" class="tax-item" value="VyStar 1099-INT gathered" /> Gather VyStar 1099-INT</label></li>
@@ -208,7 +215,7 @@
 
         <article class="card">
           <h3>Roth IRA Check</h3>
-          <p>Check AGI is below Roth IRA limit and contribute max if eligible.</p>
+          <p>Check AGI is below Roth IRA limit and contribute max if eligible. Vanguard: <a href="https://investor.vanguard.com" target="_blank" rel="noopener noreferrer">investor.vanguard.com</a>.</p>
           <button class="primary mark-complete" data-task="Roth IRA check completed">Mark as Done</button>
         </article>
       </section>
@@ -222,19 +229,6 @@
         </div>
       </section>
 
-      <section id="tab-settings" class="panel" aria-labelledby="settings-heading">
-        <h2 id="settings-heading">Settings</h2>
-        <div class="card">
-          <h3>Theme</h3>
-          <label>Choose a theme
-            <select id="theme-select">
-              <option value="light">Light</option>
-              <option value="soft-dark">Soft Dark</option>
-            </select>
-          </label>
-          <p class="muted">Theme options are a placeholder for MVP.</p>
-        </div>
-      </section>
     </main>
 
     <footer class="site-footer">Built for simple step-by-step bill management.</footer>
