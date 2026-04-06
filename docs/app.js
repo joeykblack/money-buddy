@@ -12,58 +12,161 @@ const themeSelect = document.getElementById('theme-select');
 const appMessage = document.getElementById('app-message');
 const appMessageText = document.getElementById('app-message-text');
 const appMessageClose = document.getElementById('app-message-close');
-const awwThemeCard = document.getElementById('aww-theme-card');
-const awwStartMessage = document.getElementById('aww-start-message');
-const awwImage = document.getElementById('aww-image');
+const siteHeader = document.getElementById('site-header');
+const siteSubtitle = document.getElementById('site-subtitle');
+const todayHeading = document.getElementById('today-heading');
+const monthlyHeading = document.getElementById('monthly-heading');
+const otherHeading = document.getElementById('other-heading');
+const taxesHeading = document.getElementById('taxes-heading');
+const historyHeading = document.getElementById('history-heading');
 
 let messageTimer = null;
 
-const THEME_REWARD_MESSAGES = {
+function buildStaticThemeImages(folder, { count = 12, extension = 'jpg' } = {}) {
+  return Array.from({ length: count }, (_, index) => `${folder}/${index + 1}.${extension}`);
+}
+
+// Theme contract for adding new themes:
+// 1) Add a new key under THEME_DEFINITIONS.
+// 2) Fill `ui`, `messages`, and `homeCardIds`.
+// 3) Choose `imageProvider.type`:
+//    - 'static' for local folders (most themes)
+//    - 'reddit-aww' (or another dynamic provider in future) for fetched images.
+const THEME_DEFINITIONS = {
   aww: {
-    start: [
-      'Hi hi! Let’s do this together, one tiny step at a time! 🌟',
-      'You are doing such a good job already! Let’s start! 🧸',
-      'Okay buddy, we got this! Gentle steps and big smiles! 💛',
-      'You are brave and smart. I believe in you lots! 🐣',
-      'Let’s begin! Tiny steps can make giant wins! 🌈',
-      'You are amazing. Let’s make today sparkle! ✨',
-      'Ready, set, cozy money time! You can do it! 🐾',
-      'I am cheering for you so much right now! 💕',
-      'You are not alone. We can do this together! 🌸',
-      'Deep breath, sweet friend. Step one starts now! 🍓',
-      'You are doing great. Let’s keep it simple and kind! 🫶',
-      'Gold-star energy today! Let’s go! ⭐',
-    ],
-    step: [
-      'Yayyy! You did it! 🌟',
-      'That was awesome! I am super proud of you! 🐣',
-      'Great job! Tiny steps, big progress! 💛',
-      'You are doing SO good. Keep going, sweet friend! 🧸',
-      'Nice work! You are super brave with money stuff! 🌈',
-      'Woohoo! Step complete! Happy dance time! 🐾',
-      'You are doing amazing. Big high five! ✋',
-      'That was a smart move. You are crushing it! 🐥',
-      'You did it! I believe in you so much! 💕',
-      'Gold-star moment! Keep shining bright! ⭐',
-      'You made lovely progress. So proud of you! 🌸',
-      'Look at you go! Another step finished! 🎉',
-      'Awww yeah! You nailed that step! 🐶',
-      'You are doing really, really well! 🍓',
-    ],
-    final: [
-      'You finished everything! I am SO proud of you! 🥳',
-      'All done! You took amazing care of everything today! 💖',
-      'You did the whole workflow! Superstar energy! 🌟',
-      'Mission complete! Calm, smart, and wonderful! 🐻',
-      'You did it all! Big cozy celebration time! 🎊',
-      'Great job on every step. You are incredible! 🫶',
-      'Everything is done! You deserve happy vibes! 🌈',
-      'You completed the whole thing. Yay yay yay you! 🐾',
-      'That was beautiful work from start to finish! 💛',
-      'All finished! You made today sparkle! 🌸',
-      'You did such a good job. Be proud of yourself! 🍓',
-      'You totally did it! Gold stars everywhere! ⭐',
-    ],
+    ui: {
+      subtitle: 'Cute, gentle steps for bills and money tasks 💖',
+      header: 'Money Buddy 🐾',
+      sectionHeadings: {
+        today: 'Today 🌈',
+        monthly: 'Monthly Bills 💸',
+        other: 'Other Bills 🧾',
+        taxes: 'Taxes & Annual 📅',
+        history: 'History 📖',
+      },
+    },
+    homeCardIds: {
+      card: 'aww-theme-card',
+      startMessage: 'aww-start-message',
+      image: 'aww-image',
+    },
+    imageProvider: {
+      type: 'reddit-aww',
+    },
+    messages: {
+      start: [
+        'Hi hi! Let’s do this together, one tiny step at a time! 🌟',
+        'You are doing such a good job already! Let’s start! 🧸',
+        'Okay buddy, we got this! Gentle steps and big smiles! 💛',
+        'You are brave and smart. I believe in you lots! 🐣',
+        'Let’s begin! Tiny steps can make giant wins! 🌈',
+        'You are amazing. Let’s make today sparkle! ✨',
+        'Ready, set, cozy money time! You can do it! 🐾',
+        'I am cheering for you so much right now! 💕',
+        'You are not alone. We can do this together! 🌸',
+        'Deep breath, sweet friend. Step one starts now! 🍓',
+        'You are doing great. Let’s keep it simple and kind! 🫶',
+        'Gold-star energy today! Let’s go! ⭐',
+      ],
+      step: [
+        'Yayyy! You did it! 🌟',
+        'That was awesome! I am super proud of you! 🐣',
+        'Great job! Tiny steps, big progress! 💛',
+        'You are doing SO good. Keep going, sweet friend! 🧸',
+        'Nice work! You are super brave with money stuff! 🌈',
+        'Woohoo! Step complete! Happy dance time! 🐾',
+        'You are doing amazing. Big high five! ✋',
+        'That was a smart move. You are crushing it! 🐥',
+        'You did it! I believe in you so much! 💕',
+        'Gold-star moment! Keep shining bright! ⭐',
+        'You made lovely progress. So proud of you! 🌸',
+        'Look at you go! Another step finished! 🎉',
+        'Awww yeah! You nailed that step! 🐶',
+        'You are doing really, really well! 🍓',
+      ],
+      final: [
+        'You finished everything! I am SO proud of you! 🥳',
+        'All done! You took amazing care of everything today! 💖',
+        'You did the whole workflow! Superstar energy! 🌟',
+        'Mission complete! Calm, smart, and wonderful! 🐻',
+        'You did it all! Big cozy celebration time! 🎊',
+        'Great job on every step. You are incredible! 🫶',
+        'Everything is done! You deserve happy vibes! 🌈',
+        'You completed the whole thing. Yay yay yay you! 🐾',
+        'That was beautiful work from start to finish! 💛',
+        'All finished! You made today sparkle! 🌸',
+        'You did such a good job. Be proud of yourself! 🍓',
+        'You totally did it! Gold stars everywhere! ⭐',
+      ],
+    },
+  },
+  ryangosling: {
+    ui: {
+      subtitle: 'Sharp focus. Smooth execution. Let\'s handle this. 🎬',
+      header: 'Money Buddy 🎬',
+      sectionHeadings: {
+        today: 'Status 🎯',
+        monthly: 'Monthly Moves 💸',
+        other: 'Other Tasks 🧾',
+        taxes: 'Annual Planning 📅',
+        history: 'Track Record 📖',
+      },
+    },
+    homeCardIds: {
+      card: 'ryangosling-theme-card',
+      startMessage: 'ryangosling-start-message',
+      image: 'ryangosling-image',
+    },
+    imageProvider: {
+      type: 'static',
+      images: buildStaticThemeImages('ryangosling', { count: 12, extension: 'jpg' }),
+    },
+    messages: {
+      start: [
+        'Hey. Let\'s get this handled. 🎬',
+        'I believe in you. Let\'s do this. 🚗',
+        'You got this. Time to take action. 💪',
+        'Focus. Precision. Let\'s execute. 🎯',
+        'Smooth moves. Let\'s handle business. 🎸',
+        'Cool and collected. Time to begin. ❄️',
+        'You\'re capable. Let\'s make it happen. 🔥',
+        'Drive. Determination. Let\'s start. 🏁',
+        'With finesse. Let\'s take care of this. 🥃',
+        'Stay sharp. Let\'s do this right. 🔪',
+        'Half smirk. Full focus. Let\'s go. 😎',
+        'Calm energy. Let\'s handle it. ✨',
+      ],
+      step: [
+        'Nice. You did that. 👌',
+        'That was smooth. Keep going. 🎯',
+        'Executed perfectly. Well done. 💯',
+        'You made that look easy. 🎬',
+        'Sharp work. Keep it up. 🔥',
+        'Delivered. No wasted moves. 💪',
+        'That\'s how it\'s done. 🚗',
+        'Precision. I like it. 🎯',
+        'You\'ve got rhythm. Keep going. 🎸',
+        'Clean execution. Nice. 👍',
+        'You\'re in the zone. 🔥',
+        'Steady hand. Steady mind. 💯',
+        'Flawless move. One more to go. ✨',
+        'You own this. 😎',
+      ],
+      final: [
+        'You crushed it. All done. 💯',
+        'Perfect execution from start to finish. 🎯',
+        'That\'s what success looks like. 🏆',
+        'You handled it with style. 🎬',
+        'Smooth operator. Everything complete. 🚗',
+        'You didn\'t miss a single step. 🔥',
+        'Drive and discipline. You nailed it. 💪',
+        'No hesitation. No regrets. Done. 😎',
+        'You made it look effortless. ✨',
+        'Excellence achieved. Mission complete. 🎯',
+        'Sharp focus. Sharp execution. Nice. 👌',
+        'You\'re in control. Everything handled. 🏁',
+      ],
+    },
   },
 };
 
@@ -90,7 +193,9 @@ function init() {
   state.theme = normalizeTheme(state.theme);
   applyTheme(state.theme);
   themeSelect.value = state.theme;
-  updateAwwThemeContent();
+  updateThemeHeaders();
+  updateThemeSubtitle();
+  updateThemeHomeCardContent();
 
   renderAlerts();
   renderMonthlyStep();
@@ -336,13 +441,13 @@ function bindMonthlyWalkthrough() {
     }
 
     const today = new Date().toISOString();
-    const finalReward = await getRandomAwwRewardItem(state.monthly.lastRewardUrl || '');
-    const finalMessage = getRandomThemeRewardMessage('final');
+    const finalReward = await getRandomThemeRewardItem(state.theme, state.monthly.lastRewardUrl || '');
+    const finalMessage = getRandomThemeRewardMessage('final', state.theme);
 
     state.monthly.completedAt = today;
     state.monthly.step = 5;
     state.monthly.finalReward = {
-      ...(finalReward || state.monthly.finalReward || state.awwImage || {}),
+      ...(finalReward || state.monthly.finalReward || getCachedThemeImage(state.theme) || {}),
       message: finalMessage,
     };
     if (state.monthly.finalReward?.url) {
@@ -427,9 +532,9 @@ async function showOtherBillReward(key) {
   const rewardImage = document.getElementById(`other-reward-${key}-image`);
   if (!rewardWrap || !rewardMessage || !rewardImage) return;
 
-  const item = await getRandomAwwRewardItem();
+  const item = await getRandomThemeRewardItem(state.theme);
   rewardWrap.classList.remove('hidden');
-  rewardMessage.textContent = getRandomThemeRewardMessage('step');
+  rewardMessage.textContent = getRandomThemeRewardMessage('step', state.theme);
 
   if (item?.url) {
     rewardImage.src = item.url;
@@ -548,7 +653,9 @@ function bindSettings() {
     applyTheme(value);
     state.theme = value;
     saveState();
-    updateAwwThemeContent();
+    updateThemeHeaders();
+    updateThemeSubtitle();
+    updateThemeHomeCardContent();
   });
 }
 
@@ -556,39 +663,85 @@ function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
 }
 
-async function updateAwwThemeContent() {
-  const isAwwTheme = normalizeTheme(state.theme) === 'aww';
+function getThemeDefinition(theme = state.theme) {
+  const normalized = normalizeTheme(theme);
+  return THEME_DEFINITIONS[normalized] || THEME_DEFINITIONS.aww;
+}
 
-  if (!awwThemeCard || !awwImage || !awwStartMessage) return;
+function getThemeHomeCardElements(theme = state.theme) {
+  const def = getThemeDefinition(theme);
+  const ids = def?.homeCardIds;
+  if (!ids) return null;
+  return {
+    card: document.getElementById(ids.card),
+    startMessage: document.getElementById(ids.startMessage),
+    image: document.getElementById(ids.image),
+  };
+}
 
-  if (!isAwwTheme) {
-    awwThemeCard.classList.add('hidden');
+function getCachedThemeImage(theme = state.theme) {
+  const normalized = normalizeTheme(theme);
+
+  if (normalized === 'aww') {
+    return state.awwImage || null;
+  }
+
+  const url = state.themeImages?.[normalized] || '';
+  return url ? { url } : null;
+}
+
+function cacheThemeImage(theme, item) {
+  if (!item?.url) return;
+
+  const normalized = normalizeTheme(theme);
+  if (normalized === 'aww') {
+    state.awwImage = item;
+  } else {
+    state.themeImages = state.themeImages || {};
+    state.themeImages[normalized] = item.url;
+  }
+  saveState();
+}
+
+function setThemeImage(imageEl, item) {
+  if (!imageEl) return;
+
+  if (!item?.url) {
+    imageEl.classList.add('hidden');
     return;
   }
 
-  awwThemeCard.classList.remove('hidden');
-  awwStartMessage.textContent = getRandomThemeRewardMessage('start');
+  imageEl.src = item.url;
+  imageEl.classList.remove('hidden');
+}
 
-  const cached = state.awwImage;
-  if (cached?.url) {
-    setAwwImage(cached);
-  } else {
-    awwImage.classList.add('hidden');
-  }
+async function updateThemeHomeCardContent() {
+  const activeTheme = normalizeTheme(state.theme);
+
+  Object.keys(THEME_DEFINITIONS).forEach((themeKey) => {
+    const elements = getThemeHomeCardElements(themeKey);
+    if (!elements?.card) return;
+    elements.card.classList.toggle('hidden', themeKey !== activeTheme);
+  });
+
+  const activeElements = getThemeHomeCardElements(activeTheme);
+  if (!activeElements?.card || !activeElements?.startMessage || !activeElements?.image) return;
+
+  activeElements.startMessage.textContent = getRandomThemeRewardMessage('start', activeTheme);
+
+  const cached = getCachedThemeImage(activeTheme);
+  setThemeImage(activeElements.image, cached);
 
   try {
-    const items = await getAwwFeedItems();
-    if (!items?.length) {
-      if (!cached?.url) awwImage.classList.add('hidden');
+    const randomItem = await getRandomThemeRewardItem(activeTheme, cached?.url || '');
+    if (!randomItem?.url) {
+      if (!cached?.url) activeElements.image.classList.add('hidden');
       return;
     }
-
-    const randomItem = pickRandomAwwItem(items, cached?.url);
-    state.awwImage = randomItem;
-    saveState();
-    setAwwImage(randomItem);
+    cacheThemeImage(activeTheme, randomItem);
+    setThemeImage(activeElements.image, randomItem);
   } catch {
-    if (!cached?.url) awwImage.classList.add('hidden');
+    if (!cached?.url) activeElements.image.classList.add('hidden');
   }
 }
 
@@ -600,17 +753,70 @@ function pickRandomAwwItem(items, excludeUrl = '') {
   return source[index];
 }
 
-function getRandomThemeRewardMessage(kind = 'step') {
-  const theme = normalizeTheme(state.theme);
-  const messages = THEME_REWARD_MESSAGES?.[theme]?.[kind] || THEME_REWARD_MESSAGES.aww[kind] || [];
+function pickRandomStaticImage(images, excludeUrl = '') {
+  if (!Array.isArray(images) || !images.length) return '';
+  const filtered = excludeUrl ? images.filter((url) => url !== excludeUrl) : images;
+  const source = filtered.length ? filtered : images;
+  const index = Math.floor(Math.random() * source.length);
+  return source[index] || '';
+}
+
+function getRandomThemeRewardMessage(kind = 'step', theme = state.theme) {
+  const messages = getThemeDefinition(theme)?.messages?.[kind] || getThemeDefinition('aww')?.messages?.[kind] || [];
   if (!messages.length) return 'Great job!';
   return messages[Math.floor(Math.random() * messages.length)];
 }
 
-async function getRandomAwwRewardItem(excludeUrl = '') {
-  const items = await getAwwFeedItems();
-  if (!items.length) return state.awwImage || null;
-  return pickRandomAwwItem(items, excludeUrl);
+async function getRandomThemeRewardItem(theme = state.theme, excludeUrl = '') {
+  const normalized = normalizeTheme(theme);
+  const provider = getThemeDefinition(normalized)?.imageProvider;
+
+  if (!provider) return null;
+
+  if (provider.type === 'reddit-aww') {
+    const items = await getAwwFeedItems();
+    if (!items.length) return getCachedThemeImage(normalized);
+    return pickRandomAwwItem(items, excludeUrl);
+  }
+
+  if (provider.type === 'static') {
+    const previous = excludeUrl || getCachedThemeImage(normalized)?.url || '';
+    const url = pickRandomStaticImage(provider.images, previous);
+    return url ? { url } : null;
+  }
+
+  return null;
+}
+
+function updateThemeSubtitle() {
+  if (!siteSubtitle) return;
+
+  const subtitle = getThemeDefinition(state.theme)?.ui?.subtitle || getThemeDefinition('aww')?.ui?.subtitle;
+  siteSubtitle.textContent = subtitle;
+}
+
+function updateThemeHeaders() {
+  const themeUi = getThemeDefinition(state.theme)?.ui || getThemeDefinition('aww')?.ui;
+  const headings = themeUi?.sectionHeadings || {};
+
+  if (siteHeader && themeUi?.header) {
+    siteHeader.textContent = themeUi.header;
+  }
+  if (todayHeading && headings.today) {
+    todayHeading.textContent = headings.today;
+  }
+  if (monthlyHeading && headings.monthly) {
+    monthlyHeading.textContent = headings.monthly;
+  }
+  if (otherHeading && headings.other) {
+    otherHeading.textContent = headings.other;
+  }
+  if (taxesHeading && headings.taxes) {
+    taxesHeading.textContent = headings.taxes;
+  }
+  if (historyHeading && headings.history) {
+    historyHeading.textContent = headings.history;
+  }
 }
 
 async function getAwwFeedItems() {
@@ -633,13 +839,6 @@ async function getAwwFeedItems() {
   }
 
   return Array.isArray(cachedFeed?.items) ? cachedFeed.items : [];
-}
-
-function setAwwImage(item) {
-  if (!awwImage) return;
-
-  awwImage.src = item.url;
-  awwImage.classList.remove('hidden');
 }
 
 async function fetchRecentAwwImages() {
@@ -827,23 +1026,24 @@ async function renderMonthlyStepReward(step) {
 
   rewardCard.classList.remove('hidden');
   const completedStep = step - 1;
+  const theme = normalizeTheme(state.theme);
 
   state.monthly.stepRewards = state.monthly.stepRewards || {};
   let rewardItem = state.monthly.stepRewards[String(completedStep)] || null;
 
   if (!rewardItem?.url) {
-    rewardItem = await getRandomAwwRewardItem(state.monthly.lastRewardUrl || '');
+    rewardItem = await getRandomThemeRewardItem(theme, state.monthly.lastRewardUrl || '');
     if (rewardItem?.url) {
       rewardItem = {
         ...rewardItem,
-        message: getRandomThemeRewardMessage('step'),
+        message: getRandomThemeRewardMessage('step', theme),
       };
       state.monthly.stepRewards[String(completedStep)] = rewardItem;
       state.monthly.lastRewardUrl = rewardItem.url;
       saveState();
     }
   } else if (!rewardItem.message) {
-    rewardItem.message = getRandomThemeRewardMessage('step');
+    rewardItem.message = getRandomThemeRewardMessage('step', theme);
     state.monthly.stepRewards[String(completedStep)] = rewardItem;
     saveState();
   }
@@ -870,14 +1070,30 @@ function renderMonthlyFinalReward(step) {
     return;
   }
 
-  const rewardItem = state.monthly.finalReward || state.awwImage;
+  const theme = normalizeTheme(state.theme);
+  let rewardItem = state.monthly.finalReward || getCachedThemeImage(theme);
+
+  if (!rewardItem?.url) {
+    const provider = getThemeDefinition(theme)?.imageProvider;
+    if (provider?.type === 'static') {
+      const url = pickRandomStaticImage(provider.images, state.monthly.lastRewardUrl || '');
+      if (url) {
+        rewardItem = { url };
+        state.monthly.finalReward = rewardItem;
+        state.monthly.lastRewardUrl = url;
+        cacheThemeImage(theme, rewardItem);
+        saveState();
+      }
+    }
+  }
+
   if (rewardItem?.url) {
     finalImage.src = rewardItem.url;
     finalImage.classList.remove('hidden');
-    finalMessage.textContent = rewardItem.message || 'You finished everything! Amazing work!';
+    finalMessage.textContent = rewardItem.message || getRandomThemeRewardMessage('final', theme);
   } else {
     finalImage.classList.add('hidden');
-    finalMessage.textContent = 'You finished everything! Amazing work!';
+    finalMessage.textContent = getRandomThemeRewardMessage('final', theme);
   }
 }
 
@@ -1331,6 +1547,7 @@ function loadState() {
     monthlyEntries: [],
     awwImage: null,
     awwFeed: null,
+    themeImages: {},
     alerts: {},
     history: [],
   };
@@ -1352,6 +1569,7 @@ function loadState() {
         mercury: { ...base.otherBills.mercury, ...(saved.otherBills?.mercury || {}) },
       },
       monthlyEntries: Array.isArray(saved.monthlyEntries) ? saved.monthlyEntries : [],
+      themeImages: { ...base.themeImages, ...(saved.themeImages || {}) },
       alerts: { ...base.alerts, ...(saved.alerts || {}) },
       history: Array.isArray(saved.history) ? saved.history : [],
     };
@@ -1361,7 +1579,8 @@ function loadState() {
 }
 
 function normalizeTheme(theme) {
-  return 'aww';
+  const valid = Object.keys(THEME_DEFINITIONS);
+  return valid.includes(theme) ? theme : 'aww';
 }
 
 function saveState() {
