@@ -249,6 +249,12 @@ button {
   padding-left: 0;
 }
 
+#urgent-alerts-list {
+  list-style: none;
+  padding-left: 0;
+  margin-top: 0.6rem;
+}
+
 .alert-item {
   display: grid;
   gap: 0.2rem;
@@ -270,8 +276,25 @@ button {
   font-size: 0.92rem;
 }
 
+.alert-last-done {
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.alert-link {
+  margin-top: 0.3rem;
+  width: fit-content;
+  background: transparent;
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
 .alert-done {
   border-left-color: #2f9e44;
+}
+
+.alert-in-progress {
+  border-left-color: #7950f2;
 }
 
 .alert-urgent {

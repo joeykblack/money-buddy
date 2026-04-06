@@ -24,7 +24,7 @@
 
     <nav class="tabs" aria-label="Main navigation">
       <button class="tab is-active" data-tab="today">Today</button>
-      <button class="tab" data-tab="monthly">Monthly Walkthrough</button>
+      <button class="tab" data-tab="monthly">Monthly Bills</button>
       <button class="tab" data-tab="other">Other Bills</button>
       <button class="tab" data-tab="taxes">Taxes & Annual</button>
       <button class="tab" data-tab="history">History</button>
@@ -36,7 +36,7 @@
         <div class="card">
           <h3>What should I do now?</h3>
           <p id="next-action">Loading...</p>
-          <button id="resume-monthly" class="primary">Resume Monthly Walkthrough</button>
+          <ul id="urgent-alerts-list" class="list"></ul>
         </div>
 
         <div id="aww-theme-card" class="card hidden">
@@ -51,7 +51,7 @@
       </section>
 
       <section id="tab-monthly" class="panel" aria-labelledby="monthly-heading">
-        <h2 id="monthly-heading">Monthly Bills Walkthrough</h2>
+        <h2 id="monthly-heading">Monthly Bills</h2>
 
         <div class="progress-wrap" aria-live="polite">
           <span id="monthly-progress">Step 1 of 4</span>

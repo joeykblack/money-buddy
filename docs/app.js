@@ -5,9 +5,9 @@ const state = loadState();
 const tabs = document.querySelectorAll('.tab');
 const panels = document.querySelectorAll('.panel');
 const alertsList = document.getElementById('alerts-list');
+const urgentAlertsList = document.getElementById('urgent-alerts-list');
 const historyList = document.getElementById('history-list');
 const nextAction = document.getElementById('next-action');
-const resumeMonthlyBtn = document.getElementById('resume-monthly');
 const themeSelect = document.getElementById('theme-select');
 const appMessage = document.getElementById('app-message');
 const appMessageText = document.getElementById('app-message-text');
@@ -72,6 +72,7 @@ init();
 
 function init() {
   bindTabs();
+  bindAlertLinks();
   bindMonthlyWalkthrough();
   bindOtherBills();
   bindTaxes();
@@ -111,16 +112,29 @@ function bindTabs() {
     });
   });
 
-  resumeMonthlyBtn.addEventListener('click', () => {
-    if (state.monthly.completedAt) {
-      resetMonthlyWorkflowForNewRun();
-      saveState();
-      renderMonthlyStep();
-      renderAlerts();
-      updateNextAction();
-    }
-    activateTab('monthly');
+}
+
+function bindAlertLinks() {
+  document.addEventListener('click', (event) => {
+    const button = event.target.closest('.alert-link');
+    if (!button) return;
+
+    const tab = button.dataset.tab;
+    const key = button.dataset.alertKey;
+    openGuideForAlert(tab, key);
   });
+}
+
+function openGuideForAlert(tab, key) {
+  if (!tab) return;
+  if (tab === 'monthly' && state.monthly.completedAt && key === 'monthlyWorkflow') {
+    resetMonthlyWorkflowForNewRun();
+    saveState();
+    renderMonthlyStep();
+    renderAlerts();
+    updateNextAction();
+  }
+  activateTab(tab);
 }
 
 function activateTab(name) {
@@ -292,7 +306,6 @@ function bindMonthlyWalkthrough() {
     } else {
       logEvent('Citi payment', 'Citi payment completed. No confirmation number entered.');
     }
-    markAlertCompleted('citi');
     saveState();
     renderMonthlyStep();
     renderAlerts();
@@ -331,6 +344,7 @@ function bindMonthlyWalkthrough() {
     }
 
     logEvent('Monthly workflow complete', `Completed monthly workflow on ${new Date(today).toLocaleString()}.`);
+    markAlertCompleted('monthlyWorkflow');
     saveState();
     renderHistory();
     renderAlerts();
@@ -881,24 +895,53 @@ function calculateMonthlyVanguardPlan(amountToInvest, current) {
 
 function renderAlerts() {
   const alerts = buildAlerts();
-  alertsList.innerHTML = alerts
-    .map((a) => {
-      const levelClass = toAlertLevelClass(a.level);
-      const marker = getAlertMarker(a.level);
-      return `<li class="alert-item ${levelClass}"><span class="alert-badge">${marker} ${a.level}</span> <span>${a.text}</span> <span class="alert-when">${a.when}</span></li>`;
-    })
-    .join('');
+  const urgentAlerts = alerts.filter((a) => a.level === 'Urgent' || a.level === 'Soon');
+  const topAlerts = [...urgentAlerts];
+
+  if (state.monthly.step > 1 && state.monthly.step < 5) {
+    topAlerts.unshift({
+      key: 'monthlyWorkflow',
+      level: 'In Progress',
+      text: 'Monthly Bills',
+      when: `Step ${state.monthly.step} of 4`,
+      tab: 'monthly',
+      lastDone: state.monthly.completedAt ? new Date(state.monthly.completedAt).toLocaleDateString() : null,
+    });
+  }
+
+  if (urgentAlertsList) {
+    urgentAlertsList.innerHTML = topAlerts.length
+      ? topAlerts.map((a) => renderAlertItem(a, true)).join('')
+      : '<li class="muted">No urgent alerts right now.</li>';
+  }
+
+  alertsList.innerHTML = alerts.map((a) => renderAlertItem(a, false)).join('');
+}
+
+function renderAlertItem(a, compact = false) {
+  const levelClass = toAlertLevelClass(a.level);
+  const marker = getAlertMarker(a.level);
+  const doneText = a.lastDone ? `<span class="alert-last-done">Last done: ${a.lastDone}</span>` : '<span class="alert-last-done">Last done: Not recorded</span>';
+  const guideLabel = 'Get Started';
+  const guideButton = a.level === 'Done' ? '' : `<button class="alert-link" data-tab="${a.tab}" data-alert-key="${a.key}">${guideLabel}</button>`;
+  return `<li class="alert-item ${levelClass}">
+    <span class="alert-badge">${marker} ${a.level}</span>
+    <span>${a.text}</span>
+    <span class="alert-when">Due: ${a.when}</span>
+    ${doneText}
+    ${guideButton}
+  </li>`;
 }
 
 function buildAlerts() {
   const now = new Date();
   const defs = [
     {
-      key: 'citi',
-      name: 'Citi payment due',
+      key: 'monthlyWorkflow',
+      name: 'Monthly Bills',
       tab: 'monthly',
-      getDue: () => nextMonthlyDay(9),
-      getNext: (date) => nextMonthlyDayFromDate(date, 9),
+      getDue: () => nextMonthlyDay(1),
+      getNext: (date) => nextMonthlyDayFromDate(date, 1),
     },
     {
       key: 'mercury',
@@ -909,7 +952,7 @@ function buildAlerts() {
     },
     {
       key: 'taxes',
-      name: 'Tax filing deadline',
+      name: 'File Taxes',
       tab: 'taxes',
       getDue: () => nextAnnualDate('04-15'),
       getNext: (date) => nextAnnualDateFromDate(date, '04-15'),
@@ -929,36 +972,43 @@ function buildAlerts() {
     const dueDate = def.getDue();
     const dueKey = toDateKey(dueDate);
     const completion = state.alerts?.[def.key];
+    const lastDone = completion?.completedAt ? new Date(completion.completedAt).toLocaleDateString() : null;
 
     if (completion && completion.completedForDue === dueKey) {
       const completedAt = new Date(completion.completedAt);
       alerts.push({
+        key: def.key,
         level: 'Done',
         text: `${def.name} completed`,
         when: `Due ${dueDate.toLocaleDateString()} • Done ${completedAt.toLocaleDateString()}`,
         days: -999,
         tab: def.tab,
+        lastDone,
       });
 
       const nextDate = def.getNext(dueDate);
       const nextDays = diffDays(now, nextDate);
       alerts.push({
+        key: def.key,
         level: getAlertLevel(nextDays),
         text: `${def.name} (next)`,
         when: `${nextDate.toLocaleDateString()} (${nextDays} day${nextDays === 1 ? '' : 's'})`,
         days: nextDays,
         tab: def.tab,
+        lastDone,
       });
       return;
     }
 
     const days = diffDays(now, dueDate);
     alerts.push({
+      key: def.key,
       level: getAlertLevel(days),
       text: def.name,
       when: `${dueDate.toLocaleDateString()} (${days} day${days === 1 ? '' : 's'})`,
       days,
       tab: def.tab,
+      lastDone,
     });
   });
 
@@ -973,6 +1023,7 @@ function getAlertLevel(days) {
 }
 
 function toAlertLevelClass(level) {
+  if (level === 'In Progress') return 'alert-in-progress';
   if (level === 'Done') return 'alert-done';
   if (level === 'Urgent') return 'alert-urgent';
   if (level === 'Soon') return 'alert-soon';
@@ -981,6 +1032,7 @@ function toAlertLevelClass(level) {
 }
 
 function getAlertMarker(level) {
+  if (level === 'In Progress') return '🔄';
   if (level === 'Done') return '✅';
   if (level === 'Urgent') return '⚠️';
   if (level === 'Soon') return '🔔';
@@ -1001,7 +1053,7 @@ function markAlertCompleted(key) {
 }
 
 function getCurrentDueDateForAlert(key) {
-  if (key === 'citi') return nextMonthlyDay(9);
+  if (key === 'monthlyWorkflow') return nextMonthlyDay(1);
   if (key === 'mercury') return nextFixedDate([['02-01'], ['08-01']]);
   if (key === 'taxes') return nextAnnualDate('04-15');
   if (key === 'boardman') return endOfCurrentMonthOrNext();
@@ -1047,26 +1099,7 @@ function endOfNextMonthFromDate(date) {
 }
 
 function updateNextAction() {
-  if (state.monthly.completedAt && state.monthly.step >= 5) {
-    nextAction.textContent = `Monthly walkthrough completed on ${new Date(state.monthly.completedAt).toLocaleDateString()}.`;
-    resumeMonthlyBtn.textContent = 'Start Next Monthly Walkthrough';
-    return;
-  }
-
-  if (state.monthly.step > 1) {
-    nextAction.textContent = `Monthly walkthrough in progress: Step ${state.monthly.step} of 4.`;
-    resumeMonthlyBtn.textContent = 'Continue Monthly Walkthrough';
-    return;
-  }
-
-  const alerts = buildAlerts();
-  const first = alerts.find((a) => a.level !== 'Done') || alerts[0];
-  if (first) {
-    nextAction.textContent = `${first.text} is next (${first.when}).`;
-  } else {
-    nextAction.textContent = 'No urgent alerts right now.';
-  }
-  resumeMonthlyBtn.textContent = 'Start Monthly Walkthrough';
+  nextAction.textContent = '';
 }
 
 function renderHistory() {
