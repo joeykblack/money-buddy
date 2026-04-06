@@ -9,15 +9,15 @@
   --danger: #b33030;
 }
 
-[data-theme='soft-dark'] {
-  --bg: #1f2430;
-  --panel: #2b3242;
-  --text: #eef3ff;
-  --muted: #b8c0d9;
-  --border: #46506a;
-  --accent: #6d9bff;
-  --accent-contrast: #101623;
-  --danger: #ff9a9a;
+[data-theme='aww'] {
+  --bg: #fff8f5;
+  --panel: #fffdfb;
+  --text: #3b2f2f;
+  --muted: #7b6565;
+  --border: #f0d8d0;
+  --accent: #ff8fa3;
+  --accent-contrast: #2f1d20;
+  --danger: #cc3f5b;
 }
 
 * {
@@ -122,6 +122,28 @@ body {
   border-color: var(--accent);
 }
 
+.other-bill-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.6rem 0;
+}
+
+.other-bill-tab {
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 0.45rem 0.8rem;
+  cursor: pointer;
+}
+
+.other-bill-tab.is-active {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  border-color: var(--accent);
+}
+
 main {
   max-width: 860px;
   margin: 0 auto;
@@ -168,12 +190,6 @@ select {
   border: 1px solid var(--border);
   border-radius: 8px;
   background: #fff;
-}
-
-[data-theme='soft-dark'] input,
-[data-theme='soft-dark'] select {
-  background: #1e2532;
-  color: var(--text);
 }
 
 button {
@@ -328,6 +344,21 @@ button {
 
 .status-pill.alert-later {
   background: rgba(134, 142, 150, 0.15);
+}
+
+.aww-image {
+  display: block;
+  margin-top: 0.45rem;
+  width: 100%;
+  max-width: 560px;
+  max-height: 420px;
+  object-fit: contain;
+  object-position: center;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.03);
+  margin-left: auto;
+  margin-right: auto;
 }
 
 @media (max-width: 640px) {

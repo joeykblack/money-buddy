@@ -12,8 +12,54 @@ const themeSelect = document.getElementById('theme-select');
 const appMessage = document.getElementById('app-message');
 const appMessageText = document.getElementById('app-message-text');
 const appMessageClose = document.getElementById('app-message-close');
+const awwThemeCard = document.getElementById('aww-theme-card');
+const awwStartMessage = document.getElementById('aww-start-message');
+const awwImage = document.getElementById('aww-image');
 
 let messageTimer = null;
+
+const THEME_REWARD_MESSAGES = {
+  aww: {
+    start: [
+      'You can do this. One little step at a time! 🌟',
+      'Hi! Let’s do this together. You got it! 🧸',
+      'You are ready. Let’s start and do our best! 💛',
+      'You are doing a brave thing. I am proud of you! 🐣',
+      'Let’s begin! Small steps make big wins! 🌈',
+      'You are smart and strong. Let’s get it done! 🐾',
+      'Ready, set, go! You can do hard things! 🎉',
+      'You got this today. I believe in you! 💕',
+      'Let’s make today a success, one step at a time! ⭐',
+      'You can do it. I am cheering for you! 🌸',
+    ],
+    step: [
+      'Yay! You did it! 🌟',
+      'That was awesome. I am proud of you! 🐣',
+      'Great job! One small step at a time! 💛',
+      'You are doing so good. Keep going! 🧸',
+      'Nice work! You are super brave with money stuff! 🌈',
+      'Woohoo! You finished that step like a champ! 🐾',
+      'You are doing amazing. High five! ✋',
+      'That was a smart move. You got this! 🐥',
+      'You did it! I believe in you! 💕',
+      'Gold star moment! Keep shining! ⭐',
+      'You made great progress. Proud of you! 🌸',
+      'Look at you go! Step complete! 🎉',
+    ],
+    final: [
+      'You finished everything! I am so, so proud of you! 🥳',
+      'All done! You took great care of everything today! 💖',
+      'You did the whole workflow! Amazing work! 🌟',
+      'Mission complete! You were calm, smart, and strong! 🐻',
+      'You did it all! Big celebration time! 🎊',
+      'Great job finishing every step. You are incredible! 🫶',
+      'Everything is done! You should feel proud! 🌈',
+      'You completed the whole thing perfectly. Yay you! 🐾',
+      'That was wonderful work from start to finish! 💛',
+      'All finished! You made today a success! 🌸',
+    ],
+  },
+};
 
 const monthlyStepEls = [
   document.getElementById('monthly-step-1'),
@@ -34,8 +80,10 @@ function init() {
   bindMessageBanner();
   setupCurrencyFormatting();
 
-  applyTheme(state.theme || 'light');
-  themeSelect.value = state.theme || 'light';
+  state.theme = normalizeTheme(state.theme);
+  applyTheme(state.theme);
+  themeSelect.value = state.theme;
+  updateAwwThemeContent();
 
   renderAlerts();
   renderMonthlyStep();
@@ -262,27 +310,53 @@ function bindMonthlyWalkthrough() {
     renderMonthlyStep();
   });
 
-  completeBtn.addEventListener('click', () => {
+  completeBtn.addEventListener('click', async () => {
     if (state.monthly.needsVanguardTransfer && state.monthly.vanguardAmount > 0 && !state.monthly.vanguardPlan) {
       showMessage('Please click “Calculate Exactly What to Buy” in Step 4 before completing the month.', 'error');
       return;
     }
 
     const today = new Date().toISOString();
+    const finalReward = await getRandomAwwRewardItem(state.monthly.lastRewardUrl || '');
+    const finalMessage = getRandomThemeRewardMessage('final');
+
     state.monthly.completedAt = today;
-    state.monthly.step = 4;
-    document.getElementById('reward').classList.remove('hidden');
+    state.monthly.step = 5;
+    state.monthly.finalReward = {
+      ...(finalReward || state.monthly.finalReward || state.awwImage || {}),
+      message: finalMessage,
+    };
+    if (state.monthly.finalReward?.url) {
+      state.monthly.lastRewardUrl = state.monthly.finalReward.url;
+    }
 
     logEvent('Monthly workflow complete', `Completed monthly workflow on ${new Date(today).toLocaleString()}.`);
     saveState();
     renderHistory();
     renderAlerts();
+    renderMonthlyStep();
     updateNextAction();
   });
 
 }
 
 function bindOtherBills() {
+  const otherBillTabs = document.querySelectorAll('.other-bill-tab');
+  const otherBillPanels = document.querySelectorAll('.other-bill-panel');
+
+  otherBillTabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      const selected = tab.dataset.otherbill;
+
+      otherBillTabs.forEach((t) => t.classList.remove('is-active'));
+      tab.classList.add('is-active');
+
+      otherBillPanels.forEach((panel) => {
+        panel.classList.toggle('hidden', panel.id !== `other-bill-${selected}`);
+      });
+    });
+  });
+
   const happyLawnsReceivedBtn = document.getElementById('happy-lawns-received');
   if (happyLawnsReceivedBtn) {
     happyLawnsReceivedBtn.addEventListener('click', () => {
@@ -294,7 +368,7 @@ function bindOtherBills() {
   }
 
   document.querySelectorAll('.mark-complete').forEach((btn) => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
       const task = btn.dataset.task;
       const key = btn.dataset.billKey;
 
@@ -313,12 +387,33 @@ function bindOtherBills() {
         renderAlerts();
       }
 
+      if (key) {
+        await showOtherBillReward(key);
+      }
+
       saveState();
       renderOtherBills();
-      showMessage('Saved to history. Nice work!', 'success');
       renderHistory();
     });
   });
+}
+
+async function showOtherBillReward(key) {
+  const rewardWrap = document.getElementById(`other-reward-${key}`);
+  const rewardMessage = document.getElementById(`other-reward-${key}-message`);
+  const rewardImage = document.getElementById(`other-reward-${key}-image`);
+  if (!rewardWrap || !rewardMessage || !rewardImage) return;
+
+  const item = await getRandomAwwRewardItem();
+  rewardWrap.classList.remove('hidden');
+  rewardMessage.textContent = getRandomThemeRewardMessage('step');
+
+  if (item?.url) {
+    rewardImage.src = item.url;
+    rewardImage.classList.remove('hidden');
+  } else {
+    rewardImage.classList.add('hidden');
+  }
 }
 
 function renderOtherBills() {
@@ -410,7 +505,6 @@ function bindTaxes() {
     saveState();
     logEvent('Taxes progress saved', `${state.taxes.completed.length} tax checklist item(s) checked.`);
     renderHistory();
-    showMessage('Tax progress saved.', 'success');
   });
 }
 
@@ -422,16 +516,16 @@ function bindHistory() {
     state.history = [];
     saveState();
     renderHistory();
-    showMessage('History cleared on this device.', 'success');
   });
 }
 
 function bindSettings() {
   themeSelect.addEventListener('change', () => {
-    const value = themeSelect.value;
+    const value = normalizeTheme(themeSelect.value);
     applyTheme(value);
     state.theme = value;
     saveState();
+    updateAwwThemeContent();
   });
 }
 
@@ -439,17 +533,231 @@ function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
 }
 
+async function updateAwwThemeContent() {
+  const isAwwTheme = normalizeTheme(state.theme) === 'aww';
+
+  if (!awwThemeCard || !awwImage || !awwStartMessage) return;
+
+  if (!isAwwTheme) {
+    awwThemeCard.classList.add('hidden');
+    return;
+  }
+
+  awwThemeCard.classList.remove('hidden');
+  awwStartMessage.textContent = getRandomThemeRewardMessage('start');
+
+  const cached = state.awwImage;
+  if (cached?.url) {
+    setAwwImage(cached);
+  } else {
+    awwImage.classList.add('hidden');
+  }
+
+  try {
+    const items = await getAwwFeedItems();
+    if (!items?.length) {
+      if (!cached?.url) awwImage.classList.add('hidden');
+      return;
+    }
+
+    const randomItem = pickRandomAwwItem(items, cached?.url);
+    state.awwImage = randomItem;
+    saveState();
+    setAwwImage(randomItem);
+  } catch {
+    if (!cached?.url) awwImage.classList.add('hidden');
+  }
+}
+
+function pickRandomAwwItem(items, excludeUrl = '') {
+  if (!Array.isArray(items) || !items.length) return null;
+  const filtered = excludeUrl ? items.filter((item) => item.url !== excludeUrl) : items;
+  const source = filtered.length ? filtered : items;
+  const index = Math.floor(Math.random() * source.length);
+  return source[index];
+}
+
+function getRandomThemeRewardMessage(kind = 'step') {
+  const theme = normalizeTheme(state.theme);
+  const messages = THEME_REWARD_MESSAGES?.[theme]?.[kind] || THEME_REWARD_MESSAGES.aww[kind] || [];
+  if (!messages.length) return 'Great job!';
+  return messages[Math.floor(Math.random() * messages.length)];
+}
+
+async function getRandomAwwRewardItem(excludeUrl = '') {
+  const items = await getAwwFeedItems();
+  if (!items.length) return state.awwImage || null;
+  return pickRandomAwwItem(items, excludeUrl);
+}
+
+async function getAwwFeedItems() {
+  const maxAgeMs = 1000 * 60 * 60 * 6;
+  const cachedFeed = state.awwFeed;
+  const isFeedFresh = cachedFeed?.fetchedAt && Date.now() - new Date(cachedFeed.fetchedAt).getTime() < maxAgeMs;
+
+  if (isFeedFresh && Array.isArray(cachedFeed?.items) && cachedFeed.items.length) {
+    return cachedFeed.items;
+  }
+
+  const items = await fetchRecentAwwImages();
+  if (items.length) {
+    state.awwFeed = {
+      items,
+      fetchedAt: new Date().toISOString(),
+    };
+    saveState();
+    return items;
+  }
+
+  return Array.isArray(cachedFeed?.items) ? cachedFeed.items : [];
+}
+
+function setAwwImage(item) {
+  if (!awwImage) return;
+
+  awwImage.src = item.url;
+  awwImage.classList.remove('hidden');
+}
+
+async function fetchRecentAwwImages() {
+  const data = await fetchAwwListingJson();
+  if (!data) return [];
+
+  const posts = data?.data?.children?.map((c) => c.data) || [];
+
+  return posts
+    .filter((p) => {
+      if (!p || p.over_18) return false;
+      const url = p.url_overridden_by_dest || p.url || '';
+      if (!/^https?:\/\//i.test(url)) return false;
+      return /(\.(jpg|jpeg|png|webp))(\?.*)?$/i.test(url);
+    })
+    .map((p) => ({
+      title: p.title,
+      url: p.url_overridden_by_dest || p.url,
+      permalink: p.permalink ? `https://www.reddit.com${p.permalink}` : '',
+    }));
+}
+
+async function fetchAwwListingJson() {
+  const redditUrl = 'https://www.reddit.com/r/aww/hot.json?limit=60&raw_json=1';
+
+  // Try direct Reddit request first.
+  try {
+    const direct = await fetch(redditUrl, {
+      headers: {
+        Accept: 'application/json',
+      },
+    });
+
+    if (direct.ok) {
+      return await direct.json();
+    }
+  } catch {
+    // Continue to fallback below.
+  }
+
+  // Fallback through a CORS-friendly public proxy.
+  try {
+    const proxied = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(redditUrl)}`);
+    if (!proxied.ok) return null;
+    return await proxied.json();
+  } catch {
+    return null;
+  }
+}
+
 function renderMonthlyStep() {
   const step = state.monthly.step || 1;
   monthlyStepEls.forEach((el, i) => el.classList.toggle('hidden', i + 1 !== step));
 
+  const completeScreen = document.getElementById('monthly-complete-screen');
+  if (completeScreen) {
+    completeScreen.classList.toggle('hidden', step !== 5);
+  }
+
   const progressText = document.getElementById('monthly-progress');
   const progressBar = document.getElementById('progress-bar');
-  progressText.textContent = `Step ${step} of 4`;
-  progressBar.style.width = `${Math.max(1, step) * 25}%`;
+  if (step >= 5) {
+    progressText.textContent = 'Complete';
+    progressBar.style.width = '100%';
+  } else {
+    progressText.textContent = `Step ${step} of 4`;
+    progressBar.style.width = `${Math.max(1, step) * 25}%`;
+  }
 
   renderVanguardLastStep();
+  renderMonthlyStepReward(step);
+  renderMonthlyFinalReward(step);
   updateNextAction();
+}
+
+async function renderMonthlyStepReward(step) {
+  const rewardCard = document.getElementById('monthly-step-reward');
+  const rewardTitle = document.getElementById('monthly-step-reward-title');
+  const rewardImage = document.getElementById('monthly-step-reward-image');
+
+  if (!rewardCard || !rewardTitle || !rewardImage) return;
+
+  if (step <= 1 || step >= 5) {
+    rewardCard.classList.add('hidden');
+    return;
+  }
+
+  rewardCard.classList.remove('hidden');
+  const completedStep = step - 1;
+
+  state.monthly.stepRewards = state.monthly.stepRewards || {};
+  let rewardItem = state.monthly.stepRewards[String(completedStep)] || null;
+
+  if (!rewardItem?.url) {
+    rewardItem = await getRandomAwwRewardItem(state.monthly.lastRewardUrl || '');
+    if (rewardItem?.url) {
+      rewardItem = {
+        ...rewardItem,
+        message: getRandomThemeRewardMessage('step'),
+      };
+      state.monthly.stepRewards[String(completedStep)] = rewardItem;
+      state.monthly.lastRewardUrl = rewardItem.url;
+      saveState();
+    }
+  } else if (!rewardItem.message) {
+    rewardItem.message = getRandomThemeRewardMessage('step');
+    state.monthly.stepRewards[String(completedStep)] = rewardItem;
+    saveState();
+  }
+
+  rewardTitle.textContent = rewardItem?.message || `Great job finishing Step ${completedStep}!`;
+
+  if (!rewardItem?.url) {
+    rewardImage.classList.add('hidden');
+    return;
+  }
+
+  rewardImage.src = rewardItem.url;
+  rewardImage.classList.remove('hidden');
+}
+
+function renderMonthlyFinalReward(step) {
+  const finalImage = document.getElementById('monthly-final-reward-image');
+  const finalMessage = document.getElementById('monthly-final-reward-message');
+  if (!finalImage || !finalMessage) return;
+
+  if (step !== 5) {
+    finalImage.classList.add('hidden');
+    finalMessage.textContent = '';
+    return;
+  }
+
+  const rewardItem = state.monthly.finalReward || state.awwImage;
+  if (rewardItem?.url) {
+    finalImage.src = rewardItem.url;
+    finalImage.classList.remove('hidden');
+    finalMessage.textContent = rewardItem.message || 'You finished everything! Amazing work!';
+  } else {
+    finalImage.classList.add('hidden');
+    finalMessage.textContent = 'You finished everything! Amazing work!';
+  }
 }
 
 function renderVanguardLastStep() {
@@ -739,7 +1047,7 @@ function endOfNextMonthFromDate(date) {
 }
 
 function updateNextAction() {
-  if (state.monthly.completedAt && state.monthly.step === 4) {
+  if (state.monthly.completedAt && state.monthly.step >= 5) {
     nextAction.textContent = `Monthly walkthrough completed on ${new Date(state.monthly.completedAt).toLocaleDateString()}.`;
     resumeMonthlyBtn.textContent = 'Start Next Monthly Walkthrough';
     return;
@@ -800,6 +1108,9 @@ function resetMonthlyWorkflowForNewRun() {
     VTABX: '',
   };
   state.monthly.vanguardPlan = null;
+  state.monthly.stepRewards = {};
+  state.monthly.lastRewardUrl = '';
+  state.monthly.finalReward = null;
   state.monthly.completedAt = null;
 
   const idsToClear = [
@@ -823,18 +1134,28 @@ function resetMonthlyWorkflowForNewRun() {
   const moveList = document.getElementById('monthly-move-list');
   const summary = document.getElementById('monthly-vanguard-summary');
   const actions = document.getElementById('monthly-vanguard-actions');
-  const reward = document.getElementById('reward');
+  const rewardCard = document.getElementById('monthly-step-reward');
+  const rewardTitle = document.getElementById('monthly-step-reward-title');
+  const rewardImage = document.getElementById('monthly-step-reward-image');
+  const finalRewardImage = document.getElementById('monthly-final-reward-image');
+  const finalRewardMessage = document.getElementById('monthly-final-reward-message');
+  const completeScreen = document.getElementById('monthly-complete-screen');
   if (resultText) resultText.textContent = '';
   if (moveList) moveList.innerHTML = '';
   if (summary) summary.innerHTML = '';
   if (actions) actions.innerHTML = '';
-  if (reward) reward.classList.add('hidden');
+  if (rewardCard) rewardCard.classList.add('hidden');
+  if (rewardTitle) rewardTitle.textContent = 'Reward';
+  if (rewardImage) rewardImage.classList.add('hidden');
+  if (finalRewardImage) finalRewardImage.classList.add('hidden');
+  if (finalRewardMessage) finalRewardMessage.textContent = '';
+  if (completeScreen) completeScreen.classList.add('hidden');
 }
 
 function loadState() {
   const raw = localStorage.getItem(STORAGE_KEY);
   const base = {
-    theme: 'light',
+    theme: 'aww',
     monthly: {
       step: 1,
       checking: '',
@@ -852,6 +1173,9 @@ function loadState() {
         VTABX: '',
       },
       vanguardPlan: null,
+      stepRewards: {},
+      lastRewardUrl: '',
+      finalReward: null,
       completedAt: null,
     },
     taxes: {
@@ -862,6 +1186,8 @@ function loadState() {
       happylawns: { lastDoneAt: null, receivedAt: null },
       mercury: { lastDoneAt: null },
     },
+    awwImage: null,
+    awwFeed: null,
     alerts: {},
     history: [],
   };
@@ -888,6 +1214,10 @@ function loadState() {
   } catch {
     return base;
   }
+}
+
+function normalizeTheme(theme) {
+  return 'aww';
 }
 
 function saveState() {

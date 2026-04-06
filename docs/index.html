@@ -11,8 +11,7 @@
       <div class="header-theme">
         <label for="theme-select">Theme</label>
         <select id="theme-select">
-          <option value="light">Light</option>
-          <option value="soft-dark">Soft Dark</option>
+          <option value="aww">Aww</option>
         </select>
       </div>
       <h1>Money Buddy</h1>
@@ -38,6 +37,11 @@
           <h3>What should I do now?</h3>
           <p id="next-action">Loading...</p>
           <button id="resume-monthly" class="primary">Resume Monthly Walkthrough</button>
+        </div>
+
+        <div id="aww-theme-card" class="card hidden">
+          <h3 id="aww-start-message">You can do this! 🌟</h3>
+          <img id="aww-image" class="aww-image hidden" alt="Recent image from r/aww" />
         </div>
 
         <div class="card">
@@ -141,16 +145,29 @@
           <ol id="monthly-vanguard-steps" class="list"></ol>
           <button id="monthly-step-4-back" class="secondary">Back</button>
           <button id="complete-monthly" class="primary">Mark Monthly Workflow Complete</button>
-          <div id="reward" class="reward hidden" aria-live="polite">
-            <img src="assets/rewards/celebrate.svg" alt="Celebration reward" />
-          </div>
+        </article>
+
+        <article id="monthly-step-reward" class="card hidden" aria-live="polite">
+          <h3 id="monthly-step-reward-title">Reward</h3>
+          <img id="monthly-step-reward-image" class="aww-image hidden" alt="Step reward image" />
+        </article>
+
+        <article id="monthly-complete-screen" class="card hidden" aria-live="polite">
+          <h3 id="monthly-final-reward-message"></h3>
+          <img id="monthly-final-reward-image" class="aww-image hidden" alt="Monthly completion reward image" />
         </article>
       </section>
 
       <section id="tab-other" class="panel" aria-labelledby="other-heading">
         <h2 id="other-heading">Other Bills Walkthroughs</h2>
 
-        <article class="card">
+        <nav class="other-bill-tabs" aria-label="Other bills selector">
+          <button class="other-bill-tab is-active" data-otherbill="boardman">Boardman</button>
+          <button class="other-bill-tab" data-otherbill="happylawns">Happy Lawns</button>
+          <button class="other-bill-tab" data-otherbill="mercury">Mercury</button>
+        </nav>
+
+        <article id="other-bill-boardman" class="card other-bill-panel active">
           <h3>Boardman Lawn Care</h3>
           <p><strong>Amount:</strong> $160</p>
           <p><strong>Status:</strong> <span id="other-boardman-status" class="status-pill">Loading...</span></p>
@@ -164,9 +181,13 @@
             <li>Wait for confirmation, then click <strong>Mark as Paid</strong> below.</li>
           </ol>
           <button class="primary mark-complete" data-bill-key="boardman" data-task="Boardman Lawn Care paid" data-alert-key="boardman">Mark as Paid</button>
+          <div id="other-reward-boardman" class="card hidden" aria-live="polite">
+            <h4 id="other-reward-boardman-message"></h4>
+            <img id="other-reward-boardman-image" class="aww-image hidden" alt="Boardman reward image" />
+          </div>
         </article>
 
-        <article class="card">
+        <article id="other-bill-happylawns" class="card other-bill-panel hidden">
           <h3>Happy Lawns / Integrity Lawn</h3>
           <p><strong>Amount:</strong> about $94</p>
           <p><strong>Status:</strong> <span id="other-happylawns-status" class="status-pill">Loading...</span></p>
@@ -180,9 +201,13 @@
           </ol>
           <button id="happy-lawns-received" class="secondary">I got the email bill</button>
           <button class="primary mark-complete" data-bill-key="happylawns" data-task="Happy Lawns paid">Mark as Paid</button>
+          <div id="other-reward-happylawns" class="card hidden" aria-live="polite">
+            <h4 id="other-reward-happylawns-message"></h4>
+            <img id="other-reward-happylawns-image" class="aww-image hidden" alt="Happy Lawns reward image" />
+          </div>
         </article>
 
-        <article class="card">
+        <article id="other-bill-mercury" class="card other-bill-panel hidden">
           <h3>Mercury Car Insurance</h3>
           <p><strong>Amount:</strong> about $2,000</p>
           <p><strong>Status:</strong> <span id="other-mercury-status" class="status-pill">Loading...</span></p>
@@ -196,6 +221,10 @@
             <li>Then click <strong>Mark as Paid</strong> below.</li>
           </ol>
           <button class="primary mark-complete" data-bill-key="mercury" data-task="Mercury Insurance paid" data-alert-key="mercury">Mark as Paid</button>
+          <div id="other-reward-mercury" class="card hidden" aria-live="polite">
+            <h4 id="other-reward-mercury-message"></h4>
+            <img id="other-reward-mercury-image" class="aww-image hidden" alt="Mercury reward image" />
+          </div>
         </article>
       </section>
 
