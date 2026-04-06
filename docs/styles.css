@@ -10,14 +10,14 @@
 }
 
 [data-theme='aww'] {
-  --bg: #fff8f5;
-  --panel: #fffdfb;
-  --text: #3b2f2f;
-  --muted: #7b6565;
-  --border: #f0d8d0;
-  --accent: #ff8fa3;
-  --accent-contrast: #2f1d20;
-  --danger: #cc3f5b;
+  --bg: #fff6fb;
+  --panel: #fffdfd;
+  --text: #4a3040;
+  --muted: #8d6c7a;
+  --border: #f7cfe0;
+  --accent: #ff8fba;
+  --accent-contrast: #3a1f2b;
+  --danger: #d84d7a;
 }
 
 * {
@@ -32,6 +32,15 @@ body {
   line-height: 1.5;
 }
 
+[data-theme='aww'] body {
+  font-family: 'Comic Sans MS', 'Chalkboard SE', 'Trebuchet MS', Arial, sans-serif;
+  background:
+    radial-gradient(circle at 12% 10%, rgba(255, 182, 193, 0.22) 0, rgba(255, 182, 193, 0) 34%),
+    radial-gradient(circle at 88% 14%, rgba(182, 226, 255, 0.22) 0, rgba(182, 226, 255, 0) 33%),
+    radial-gradient(circle at 24% 88%, rgba(255, 221, 170, 0.22) 0, rgba(255, 221, 170, 0) 35%),
+    var(--bg);
+}
+
 .site-header,
 .site-footer {
   text-align: center;
@@ -40,6 +49,11 @@ body {
 
 .site-header {
   position: relative;
+}
+
+[data-theme='aww'] .site-header h1 {
+  letter-spacing: 0.4px;
+  text-shadow: 0 1px 0 #fff;
 }
 
 .header-theme {
@@ -122,6 +136,11 @@ body {
   border-color: var(--accent);
 }
 
+[data-theme='aww'] .tab,
+[data-theme='aww'] .other-bill-tab {
+  box-shadow: 0 2px 0 rgba(255, 143, 186, 0.22);
+}
+
 .other-bill-tabs {
   display: flex;
   flex-wrap: wrap;
@@ -166,6 +185,11 @@ main {
   margin: 0.8rem 0;
 }
 
+[data-theme='aww'] .card {
+  border-radius: 16px;
+  box-shadow: 0 6px 16px rgba(255, 143, 186, 0.14);
+}
+
 .form-grid {
   display: grid;
   gap: 0.75rem;
@@ -204,6 +228,17 @@ button {
   color: var(--accent-contrast);
   border-color: var(--accent);
   margin-top: 0.65rem;
+}
+
+[data-theme='aww'] .primary {
+  font-weight: 700;
+  box-shadow: 0 3px 0 rgba(255, 143, 186, 0.36);
+}
+
+[data-theme='aww'] .primary:hover,
+[data-theme='aww'] .secondary:hover,
+[data-theme='aww'] .alert-link:hover {
+  transform: translateY(-1px);
 }
 
 .secondary {
@@ -263,6 +298,10 @@ button {
   border-radius: 10px;
   padding: 0.6rem 0.7rem;
   margin-bottom: 0.55rem;
+}
+
+[data-theme='aww'] .alert-item {
+  background: linear-gradient(180deg, #fffdfd 0%, #fff7fb 100%);
 }
 
 .alert-badge {
@@ -390,6 +429,10 @@ button {
 
 .values-table th {
   background: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme='aww'] .values-table th {
+  background: #ffeaf2;
 }
 
 .aww-image {
