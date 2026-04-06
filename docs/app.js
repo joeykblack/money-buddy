@@ -343,6 +343,9 @@ function bindMonthlyWalkthrough() {
       state.monthly.lastRewardUrl = state.monthly.finalReward.url;
     }
 
+    state.monthlyEntries = Array.isArray(state.monthlyEntries) ? state.monthlyEntries : [];
+    state.monthlyEntries.unshift(createMonthlyEntrySnapshot(today));
+
     logEvent('Monthly workflow complete', `Completed monthly workflow on ${new Date(today).toLocaleString()}.`);
     markAlertCompleted('monthlyWorkflow');
     saveState();
@@ -704,6 +707,104 @@ function renderMonthlyStep() {
   renderMonthlyStepReward(step);
   renderMonthlyFinalReward(step);
   updateNextAction();
+}
+
+function createMonthlyEntrySnapshot(completedAt) {
+  const checking = Number(state.monthly.checking || 0);
+  const savings = Number(state.monthly.savings || 0);
+  const citi = Number(state.monthly.citi || 0);
+  const result = Number(state.monthly.result || 0);
+  const savingsGap = Math.max(0, roundMoney(70000 - savings));
+  const toSavings = result > 0 ? roundMoney(Math.min(result, savingsGap)) : 0;
+  const toVanguard = result > 0 ? roundMoney(result - toSavings) : 0;
+
+  return {
+    completedAt,
+    checking,
+    savings,
+    citi,
+    result,
+    toSavings,
+    toVanguard,
+    fromSavingsToChecking: result < 0 ? Math.abs(result) : 0,
+    citiConfirmation: state.monthly.citiConfirmation || '',
+    vanguardCurrent: {
+      settlement: Number(state.monthly.vanguardCurrent?.settlement || 0),
+      VTSAX: Number(state.monthly.vanguardCurrent?.VTSAX || 0),
+      VTIAX: Number(state.monthly.vanguardCurrent?.VTIAX || 0),
+      VBTLX: Number(state.monthly.vanguardCurrent?.VBTLX || 0),
+      VTABX: Number(state.monthly.vanguardCurrent?.VTABX || 0),
+    },
+    vanguardBuy: {
+      settlement: Number(state.monthly.vanguardPlan?.buy?.settlement || 0),
+      VTSAX: Number(state.monthly.vanguardPlan?.buy?.VTSAX || 0),
+      VTIAX: Number(state.monthly.vanguardPlan?.buy?.VTIAX || 0),
+      VBTLX: Number(state.monthly.vanguardPlan?.buy?.VBTLX || 0),
+      VTABX: Number(state.monthly.vanguardPlan?.buy?.VTABX || 0),
+    },
+  };
+}
+
+function renderMonthlyEntriesTables() {
+  const container = document.getElementById('monthly-entries-container');
+  if (!container) return;
+
+  const entries = Array.isArray(state.monthlyEntries) ? state.monthlyEntries : [];
+  if (!entries.length) {
+    container.innerHTML = '<div class="card muted">No Monthly Bills entries yet.</div>';
+    return;
+  }
+
+  container.innerHTML = entries
+    .map((entry, idx) => {
+      const rows = buildMonthlyEntryRows(entry)
+        .map(([label, value]) => `<tr><td>${label}</td><td>${value}</td></tr>`)
+        .join('');
+
+      const dateText = new Date(entry.completedAt).toLocaleString();
+      return `
+        <details class="card" ${idx === 0 ? 'open' : ''}>
+          <summary><strong>Monthly Bills Entry — ${dateText}</strong></summary>
+          <div class="table-wrap">
+            <table class="values-table" aria-label="Monthly bill values entry ${idx + 1}">
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
+        </details>
+      `;
+    })
+    .join('');
+}
+
+function buildMonthlyEntryRows(entry) {
+  return [
+    ['Completed At', new Date(entry.completedAt).toLocaleString()],
+    ['VyStar Checking', fmt(Number(entry.checking || 0))],
+    ['VyStar Savings', fmt(Number(entry.savings || 0))],
+    ['Citi Balance', fmt(Number(entry.citi || 0))],
+    ['Reserve in Checking', fmt(4000)],
+    ['Result (checking - citi - 4000)', fmt(Number(entry.result || 0))],
+    ['Move Checking → Savings', fmt(Number(entry.toSavings || 0))],
+    ['Move Checking → Vanguard', fmt(Number(entry.toVanguard || 0))],
+    ['Move Savings → Checking (if negative result)', fmt(Number(entry.fromSavingsToChecking || 0))],
+    ['Citi Confirmation #', entry.citiConfirmation || 'Not entered'],
+    ['Vanguard Input: Settlement Current', fmt(Number(entry.vanguardCurrent?.settlement || 0))],
+    ['Vanguard Input: VTSAX Current', fmt(Number(entry.vanguardCurrent?.VTSAX || 0))],
+    ['Vanguard Input: VTIAX Current', fmt(Number(entry.vanguardCurrent?.VTIAX || 0))],
+    ['Vanguard Input: VBTLX Current', fmt(Number(entry.vanguardCurrent?.VBTLX || 0))],
+    ['Vanguard Input: VTABX Current', fmt(Number(entry.vanguardCurrent?.VTABX || 0))],
+    ['Vanguard Buy: Settlement', fmt(Number(entry.vanguardBuy?.settlement || 0))],
+    ['Vanguard Buy: VTSAX', fmt(Number(entry.vanguardBuy?.VTSAX || 0))],
+    ['Vanguard Buy: VTIAX', fmt(Number(entry.vanguardBuy?.VTIAX || 0))],
+    ['Vanguard Buy: VBTLX', fmt(Number(entry.vanguardBuy?.VBTLX || 0))],
+    ['Vanguard Buy: VTABX', fmt(Number(entry.vanguardBuy?.VTABX || 0))],
+  ];
 }
 
 async function renderMonthlyStepReward(step) {
@@ -1103,6 +1204,8 @@ function updateNextAction() {
 }
 
 function renderHistory() {
+  renderMonthlyEntriesTables();
+
   if (!state.history.length) {
     historyList.innerHTML = '<li>No history yet.</li>';
     return;
@@ -1219,6 +1322,7 @@ function loadState() {
       happylawns: { lastDoneAt: null, receivedAt: null },
       mercury: { lastDoneAt: null },
     },
+    monthlyEntries: [],
     awwImage: null,
     awwFeed: null,
     alerts: {},
@@ -1241,6 +1345,7 @@ function loadState() {
         happylawns: { ...base.otherBills.happylawns, ...(saved.otherBills?.happylawns || {}) },
         mercury: { ...base.otherBills.mercury, ...(saved.otherBills?.mercury || {}) },
       },
+      monthlyEntries: Array.isArray(saved.monthlyEntries) ? saved.monthlyEntries : [],
       alerts: { ...base.alerts, ...(saved.alerts || {}) },
       history: Array.isArray(saved.history) ? saved.history : [],
     };

@@ -369,6 +369,29 @@ button {
   background: rgba(134, 142, 150, 0.15);
 }
 
+.table-wrap {
+  overflow-x: auto;
+  margin-top: 0.6rem;
+}
+
+.values-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.values-table th,
+.values-table td {
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.6rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.values-table th {
+  background: rgba(0, 0, 0, 0.04);
+}
+
 .aww-image {
   display: block;
   margin-top: 0.45rem;
