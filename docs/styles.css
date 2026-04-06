@@ -64,6 +64,17 @@
   --danger: #d94c7f;
 }
 
+[data-theme='bassethound'] {
+  --bg: #f5f1ec;
+  --panel: #fefbf5;
+  --text: #3d3229;
+  --muted: #8b7d6b;
+  --border: #d9cfc2;
+  --accent: #a68874;
+  --accent-contrast: #f5f1ec;
+  --danger: #b86464;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -114,6 +125,15 @@ body {
     radial-gradient(circle at 10% 12%, rgba(255, 111, 181, 0.18) 0, rgba(255, 111, 181, 0) 32%),
     radial-gradient(circle at 88% 16%, rgba(111, 220, 255, 0.2) 0, rgba(111, 220, 255, 0) 34%),
     radial-gradient(circle at 24% 88%, rgba(255, 214, 102, 0.2) 0, rgba(255, 214, 102, 0) 34%),
+    var(--bg);
+}
+
+[data-theme='bassethound'] body {
+  font-family: 'Garamond', 'Georgia', serif;
+  background:
+    radial-gradient(circle at 12% 12%, rgba(166, 136, 116, 0.15) 0, rgba(166, 136, 116, 0) 32%),
+    radial-gradient(circle at 88% 18%, rgba(139, 125, 107, 0.12) 0, rgba(139, 125, 107, 0) 34%),
+    radial-gradient(circle at 25% 85%, rgba(189, 163, 136, 0.1) 0, rgba(189, 163, 136, 0) 36%),
     var(--bg);
 }
 
@@ -753,6 +773,22 @@ button {
   margin-left: auto;
   margin-right: auto;
   box-shadow: 0 10px 24px rgba(201, 79, 214, 0.24);
+}
+
+.bassethound-image {
+  display: block;
+  margin-top: 0.55rem;
+  width: 100%;
+  max-width: 560px;
+  max-height: 420px;
+  object-fit: contain;
+  object-position: center;
+  border-radius: 12px;
+  border: 2px solid #a68874;
+  background: rgba(245, 241, 236, 0.7);
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow: 0 8px 20px rgba(166, 136, 116, 0.28);
 }
 
 @media (max-width: 640px) {
