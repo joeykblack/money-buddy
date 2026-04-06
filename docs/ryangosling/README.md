@@ -5,7 +5,7 @@ Add your Ryan Gosling images here with the following naming convention:
 - 1.jpg
 - 2.jpg
 - 3.jpg
-- ... up to 12.jpg
+- ... up to 10.jpg
 
 These images will be randomly selected when using the Ryan Gosling theme.
 

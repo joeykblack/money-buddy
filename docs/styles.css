@@ -31,6 +31,17 @@
   --danger: #ff6b6b;
 }
 
+[data-theme='spiderqueen'] {
+  --bg: #100916;
+  --panel: #1a1025;
+  --text: #efe8ff;
+  --muted: #c2b0dd;
+  --border: #4e2f6f;
+  --accent: #a349d8;
+  --accent-contrast: #ffffff;
+  --danger: #ff5f8f;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -60,6 +71,14 @@ body {
     var(--bg);
 }
 
+[data-theme='spiderqueen'] body {
+  font-family: 'Cinzel', 'Georgia', serif;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(163, 73, 216, 0.22) 0, rgba(163, 73, 216, 0) 35%),
+    radial-gradient(circle at 88% 16%, rgba(117, 38, 161, 0.2) 0, rgba(117, 38, 161, 0) 36%),
+    linear-gradient(180deg, #12091c 0%, #0e0716 100%);
+}
+
 .site-header,
 .site-footer {
   text-align: center;
@@ -80,6 +99,14 @@ body {
   letter-spacing: 2px;
   color: #1e90ff;
   font-weight: 700;
+  margin-bottom: 0.3rem;
+}
+
+[data-theme='spiderqueen'] .site-header h1 {
+  font-size: 2.2rem;
+  letter-spacing: 1.6px;
+  color: #c56df6;
+  text-shadow: 0 0 14px rgba(197, 109, 246, 0.35);
   margin-bottom: 0.3rem;
 }
 
@@ -174,9 +201,20 @@ body {
   transition: all 0.3s ease;
 }
 
+[data-theme='spiderqueen'] .tab,
+[data-theme='spiderqueen'] .other-bill-tab {
+  box-shadow: 0 2px 12px rgba(163, 73, 216, 0.25);
+  transition: all 0.3s ease;
+}
+
 [data-theme='ryangosling'] .tab:hover,
 [data-theme='ryangosling'] .other-bill-tab:hover {
   box-shadow: 0 4px 16px rgba(30, 144, 255, 0.25);
+}
+
+[data-theme='spiderqueen'] .tab:hover,
+[data-theme='spiderqueen'] .other-bill-tab:hover {
+  box-shadow: 0 4px 18px rgba(163, 73, 216, 0.38);
 }
 
 .other-bill-tabs {
@@ -232,6 +270,12 @@ main {
   background: linear-gradient(135deg, #242d3f 0%, #1e2538 100%);
   border: 1px solid #3a4556;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme='spiderqueen'] .card {
+  background: linear-gradient(135deg, #1b1028 0%, #140b1f 100%);
+  border: 1px solid #5a3380;
+  box-shadow: 0 8px 24px rgba(80, 23, 116, 0.45);
 }
 
 .form-grid {
@@ -291,6 +335,12 @@ button {
   transition: all 0.3s ease;
 }
 
+[data-theme='spiderqueen'] .primary,
+[data-theme='spiderqueen'] .secondary,
+[data-theme='spiderqueen'] button {
+  transition: all 0.3s ease;
+}
+
 [data-theme='ryangosling'] .primary {
   font-weight: 600;
   box-shadow: 0 4px 12px rgba(30, 144, 255, 0.3);
@@ -298,6 +348,16 @@ button {
 
 [data-theme='ryangosling'] .primary:hover {
   box-shadow: 0 6px 20px rgba(30, 144, 255, 0.45);
+  transform: translateY(-2px);
+}
+
+[data-theme='spiderqueen'] .primary {
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(163, 73, 216, 0.35);
+}
+
+[data-theme='spiderqueen'] .primary:hover {
+  box-shadow: 0 8px 20px rgba(163, 73, 216, 0.5);
   transform: translateY(-2px);
 }
 
@@ -524,6 +584,22 @@ button {
   margin-left: auto;
   margin-right: auto;
   box-shadow: 0 8px 20px rgba(30, 144, 255, 0.25);
+}
+
+.spiderqueen-image {
+  display: block;
+  margin-top: 0.55rem;
+  width: 100%;
+  max-width: 560px;
+  max-height: 420px;
+  object-fit: contain;
+  object-position: center;
+  border-radius: 8px;
+  border: 2px solid #a349d8;
+  background: rgba(0, 0, 0, 0.35);
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow: 0 10px 22px rgba(163, 73, 216, 0.35);
 }
 
 @media (max-width: 640px) {
